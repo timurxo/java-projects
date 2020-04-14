@@ -1,0 +1,115 @@
+
+import java.sql.*;
+
+public class Main {
+
+    public static final String DB_NAME = "BankingSystem.db";
+    public static final String CONNECTING_STRING = "jdbc:sqlite:" + DB_NAME;
+
+    // TABLE OF CUSTOMERS
+    public static final String TABLE_CUSTOMERS = "customers";
+    public static final String COLUMN_CUSTOMER_NAME = "name";
+    public static final String COLUMN_CASH = "cash";
+    public static final String COLUMN_CREDIT_SCORE = "score";
+
+    // TABLE OF BANKS
+    public static final String TABLE_BANKS = "banks";
+    public static final String COLUMN_BANK_NAME = "name";
+    public static final String COLUMN_BRANCH = "branch";
+
+    // TABLE OF CITIES
+    public static final String TABLE_STATES = "states";
+    public static final String COLUMN_STATE_NAME = "name";
+
+
+    public static void main(String[] args) {
+
+        try {
+
+            // ACCESS/CREATE DATABASE
+            Connection connection = DriverManager.getConnection(CONNECTING_STRING);
+
+            Statement statement = connection.createStatement();
+
+            // make sure there is only one table of certain type
+            statement.execute("DROP TABLE IF EXISTS " + TABLE_CUSTOMERS);
+            statement.execute("DROP TABLE IF EXISTS " + TABLE_BANKS);
+            statement.execute("DROP TABLE IF EXISTS " + TABLE_STATES);
+
+
+            // -------------------- CREATE TABLES -----------------------------
+            // --- CUSTOMERS
+            // --> CREATE TABLE IF NOT EXISTS customers (name text, cash integer, score integer)
+            statement.execute("CREATE TABLE IF NOT EXISTS " + TABLE_CUSTOMERS +
+                                " (" + COLUMN_CUSTOMER_NAME + " text, " +
+                                COLUMN_CASH + " integer, " +
+                                COLUMN_CREDIT_SCORE + " integer)");
+
+            // --- BANKS
+            statement.execute("CREATE TABLE IF NOT EXISTS " + TABLE_BANKS +
+                    " (" + COLUMN_BANK_NAME + " text, " +
+                    COLUMN_BRANCH + " text)");
+
+            // --- CITIES
+            statement.execute("CREATE TABLE IF NOT EXISTS " + TABLE_STATES +
+                    " (" + COLUMN_STATE_NAME + " text)");
+
+
+            // --------------------- INSERT SOME DATA -------------------------
+            // --- CUSTOMERS
+            insertCustomer(statement, "Billy", 500, 700);
+            insertCustomer(statement, "John", 2300, 700);
+            insertCustomer(statement, "Adam", 11500, 900);
+            insertCustomer(statement, "Ann", 5000, 780);
+            insertCustomer(statement, "Susan", 7200, 850);
+            insertCustomer(statement, "Steve", 20, 300);
+
+            // --- BANKS
+            insertBank(statement, "Bank of America", "Dallas");
+            insertBank(statement, "JPMorgan", "Austin");
+            insertBank(statement, "Citigroup", "New York");
+            insertBank(statement, "Wells Fargo", "Seattle");
+
+            // -- STATES
+            insertState(statement, "Texas");
+            insertState(statement, "New York");
+            insertState(statement, "Washington");
+
+
+            // ---------------- CLOSE DB -------------------
+            statement.close();
+            connection.close();
+
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+
+    }
+
+    // --------------------- METHODS TO INSERT DATA INTO TABLE --------------------------
+    // --> INSERT INTO customers (name, cash, score) VALUES (name, cash, score)
+    private static void insertCustomer(Statement statement, String name, int cash, int score) throws SQLException {
+
+        statement.execute("INSERT INTO " + TABLE_CUSTOMERS +
+                " (" + COLUMN_CUSTOMER_NAME + ", " +
+                COLUMN_CASH + ", " +
+                COLUMN_CREDIT_SCORE +
+                " ) " +
+                "VALUES('" + name + "', " + cash + ", '" + score + "')");
+    }
+
+    private static void insertBank(Statement statement, String name, String branch) throws SQLException{
+        statement.execute("INSERT INTO " + TABLE_BANKS +
+                        " (" + COLUMN_BANK_NAME + ", " +
+                            COLUMN_BRANCH + ") " +
+                            "VALUES('" + name + "', '" + branch + "')");
+    }
+
+    private static void insertState(Statement statement, String name) throws SQLException{
+        statement.execute("INSERT INTO " + TABLE_STATES +
+                        " (" + COLUMN_STATE_NAME + ") " +
+                        "VALUES('" + name + "')");
+    }
+}
