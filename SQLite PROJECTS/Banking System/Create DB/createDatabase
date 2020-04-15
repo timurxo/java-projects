@@ -1,3 +1,4 @@
+package com.example;
 
 import java.sql.*;
 
@@ -7,18 +8,27 @@ public class Main {
     public static final String CONNECTING_STRING = "jdbc:sqlite:" + DB_NAME;
 
     // TABLE OF CUSTOMERS
-    public static final String TABLE_CUSTOMERS = "customers";
-    public static final String COLUMN_CUSTOMER_NAME = "name";
+    public static final String TABLE_CUSTOMERS = "customers";   // name of table
+
+    public static final String COLUMN_CUSTOMER_ID = "id";      // if of table
+    public static final String COLUMN_CUSTOMER_NAME = "name";   // contents of table
     public static final String COLUMN_CASH = "cash";
     public static final String COLUMN_CREDIT_SCORE = "score";
 
+    public static final String COLUMN_CUSTOMER_BANKS = "bank";  // link to another table
+
     // TABLE OF BANKS
     public static final String TABLE_BANKS = "banks";
+
+    public static final String COLUMN_BANKS_ID = "id";
     public static final String COLUMN_BANK_NAME = "name";
     public static final String COLUMN_BRANCH = "branch";
 
-    // TABLE OF CITIES
+    public static final String COLUMN_BANK_STATE = "state";
+
+    // TABLE OF STATES
     public static final String TABLE_STATES = "states";
+    public static final String COLUMN_STATES_ID = "id";
     public static final String COLUMN_STATE_NAME = "name";
 
 
@@ -41,39 +51,56 @@ public class Main {
             // --- CUSTOMERS
             // --> CREATE TABLE IF NOT EXISTS customers (name text, cash integer, score integer)
             statement.execute("CREATE TABLE IF NOT EXISTS " + TABLE_CUSTOMERS +
-                                " (" + COLUMN_CUSTOMER_NAME + " text, " +
-                                COLUMN_CASH + " integer, " +
-                                COLUMN_CREDIT_SCORE + " integer)");
+                                " (" + COLUMN_CUSTOMER_ID + " integer, " +
+                                        COLUMN_CUSTOMER_NAME + " text, " +
+                                        COLUMN_CASH + " integer, " +
+                                        COLUMN_CREDIT_SCORE + " integer, " +
+                                        COLUMN_CUSTOMER_BANKS + " integer)");
 
             // --- BANKS
             statement.execute("CREATE TABLE IF NOT EXISTS " + TABLE_BANKS +
-                    " (" + COLUMN_BANK_NAME + " text, " +
-                    COLUMN_BRANCH + " text)");
+                    " (" + COLUMN_CUSTOMER_ID + " integer, " +
+                    COLUMN_BANK_NAME + " text, " +
+                    COLUMN_BRANCH + " text, " +
+                    COLUMN_BANK_STATE + " integer)");
 
             // --- CITIES
             statement.execute("CREATE TABLE IF NOT EXISTS " + TABLE_STATES +
-                    " (" + COLUMN_STATE_NAME + " text)");
+                    " (" + COLUMN_STATES_ID + " integer, " + COLUMN_STATE_NAME + " text)");
 
 
             // --------------------- INSERT SOME DATA -------------------------
             // --- CUSTOMERS
-            insertCustomer(statement, "Billy", 500, 700);
-            insertCustomer(statement, "John", 2300, 700);
-            insertCustomer(statement, "Adam", 11500, 900);
-            insertCustomer(statement, "Ann", 5000, 780);
-            insertCustomer(statement, "Susan", 7200, 850);
-            insertCustomer(statement, "Steve", 20, 300);
+            insertCustomer(statement, 1,"Billy", 500, 700, 1);
+            insertCustomer(statement, 2,"John", 2300, 700, 2);
+            insertCustomer(statement, 3,"Adam", 11500, 900,3);
+            insertCustomer(statement, 4,"Ann", 5000, 780,4);
+            insertCustomer(statement, 5,"Susan", 7200, 850,2);
+            insertCustomer(statement, 6,"Steve", 20, 300,3);
+            insertCustomer(statement, 3,"Joshua", 16500, 900,1);
+            insertCustomer(statement, 4,"Mike", 5505, 750,2);
+            insertCustomer(statement, 5,"Jim", 73200, 950,4);
+            insertCustomer(statement, 6,"Creed", 220, 500,3);
+
+            // print out and check the table contents
+            ResultSet results = statement.executeQuery("SELECT * FROM customers");
+            while(results.next()) {
+                System.out.println(results.getString(COLUMN_CUSTOMER_NAME) + ": $" +
+                                results.getInt(COLUMN_CASH) + " score:" +
+                                results.getInt(COLUMN_CREDIT_SCORE));
+            }
+
 
             // --- BANKS
-            insertBank(statement, "Bank of America", "Dallas");
-            insertBank(statement, "JPMorgan", "Austin");
-            insertBank(statement, "Citigroup", "New York");
-            insertBank(statement, "Wells Fargo", "Seattle");
+            insertBank(statement, 1,"Bank of America", "Dallas",1);
+            insertBank(statement, 2,"JPMorgan", "Austin",1);
+            insertBank(statement, 3,"Citigroup", "New York",2);
+            insertBank(statement, 4,"Wells Fargo", "Seattle",3);
 
             // -- STATES
-            insertState(statement, "Texas");
-            insertState(statement, "New York");
-            insertState(statement, "Washington");
+            insertState(statement, 1,"Texas");
+            insertState(statement, 2,"New York");
+            insertState(statement, 3, "Washington");
 
 
             // ---------------- CLOSE DB -------------------
@@ -90,26 +117,30 @@ public class Main {
 
     // --------------------- METHODS TO INSERT DATA INTO TABLE --------------------------
     // --> INSERT INTO customers (name, cash, score) VALUES (name, cash, score)
-    private static void insertCustomer(Statement statement, String name, int cash, int score) throws SQLException {
+    private static void insertCustomer(Statement statement, int id, String name, int cash, int score, int bank) throws SQLException {
 
         statement.execute("INSERT INTO " + TABLE_CUSTOMERS +
-                " (" + COLUMN_CUSTOMER_NAME + ", " +
+                " (" + COLUMN_CUSTOMER_ID + ", " +
+                COLUMN_CUSTOMER_NAME + ", " +
                 COLUMN_CASH + ", " +
-                COLUMN_CREDIT_SCORE +
+                COLUMN_CREDIT_SCORE + ", " +
+                COLUMN_CUSTOMER_BANKS +
                 " ) " +
-                "VALUES('" + name + "', " + cash + ", '" + score + "')");
+                "VALUES('" + id + "', '" + name + "', " + cash + ", '" + score + "', '" + bank + "')");
     }
 
-    private static void insertBank(Statement statement, String name, String branch) throws SQLException{
+    private static void insertBank(Statement statement, int id, String name, String branch, int state) throws SQLException{
         statement.execute("INSERT INTO " + TABLE_BANKS +
-                        " (" + COLUMN_BANK_NAME + ", " +
-                            COLUMN_BRANCH + ") " +
-                            "VALUES('" + name + "', '" + branch + "')");
+                        " (" + COLUMN_BANKS_ID + ", " +
+                            COLUMN_BANK_NAME + ", " +
+                            COLUMN_BRANCH + ", " +
+                            COLUMN_BANK_STATE + ") " +
+                            "VALUES('" + id + "', '" + name + "', '" + branch + "', '" + state + "')");
     }
 
-    private static void insertState(Statement statement, String name) throws SQLException{
+    private static void insertState(Statement statement, int id, String name) throws SQLException{
         statement.execute("INSERT INTO " + TABLE_STATES +
-                        " (" + COLUMN_STATE_NAME + ") " +
-                        "VALUES('" + name + "')");
+                        " (" + COLUMN_STATES_ID + ", " + COLUMN_STATE_NAME + ") " +
+                        "VALUES('" + id + "', '" + name + "')");
     }
 }
