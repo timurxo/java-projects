@@ -43,6 +43,8 @@ public class MainTest {
         for(String customers: customersByBank1) {
             System.out.println(customers);
         }
+        
+        simpleOperations.closeDB();
 
     }
 
